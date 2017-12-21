@@ -13,13 +13,14 @@ class Player
   end
 end
 
-class Team(runs = 0)
-  attr_accessor :owner_name
+class Team
+  attr_accessor :owner_name, :decision
 
-  def initialize
+  def initialize(runs = 0)
     @owner_name = ""
     @total_runs = runs
     @players = []
+    @decision = ""
   end
 
   def create_team
@@ -50,47 +51,33 @@ class Game
     @p1.owner_name = input("Player 1 - Please enter your name").capitalize
     @p2.owner_name = input("Player 2 - Please enter your name").capitalize
 
-    # one person is randomly selected for the toss
+    # random team is choosen to make the toss
     @toss_winner = random([@p1, @p2])
-    # that person then chooses heads or tails
+    @toss_looser = @toss_winner == @p1 ? @p2 : @p1
+
+    # winner decides heads or tails
     loop do
-      @toss_winner_decision = input("#{@toss_winner.owner_name} - gets to decide the toss. Please enter \"heads\" or \"tails\" to continue.").downcase
-      break if @toss_winner_decision == "heads" || @toss_winner_decision == "tails"
-    end
-    #begin computer toss
-    @computer_toss = random(["heads", "tails"])
-    puts ".....and it is #{@computer_toss}."
-    # if the call is the same as the toss then the one person gets to decide wheter to bat or bowl
-
-    # @toss_winner = @p1
-    # @toss_winner_decision = "Heads"
-    # @computer_toss = "Heads"
-    # @toss_winner = @p1
-    # @toss_looser = @p2
-    # @toss_winner_decision = "Bat"
-    # @toss_looser_decision = "Bowl"
-
-    # else the other person gets to decide
-
-
-
-
-    # that person gets to choose if it is heads or tails
-
-
-    # computer randomly chooses heads or tails
-
-    # logic to decide looser of toss
-    @toss_looser = @toss_winner.owner_name == @p1.owner_name ? @p2 : @p1
-
-    loop do
-      print @computer_toss == @toss_decision ? "#{@toss_winner.owner_name} - Won the toss." : "#{@toss_winner.owner_name} - Lost the toss! #{@toss_looser.owner_name}"
-      @toss_winner_decision = input(" - Please enter either \"bat\" or \"bowl\" to continue.").downcase
-      break if @toss_winner_decision == "bat" || @toss_winner_decision == "bowl"
+      @toss_winner.decision = input("#{@toss_winner.owner_name} gets to decide the toss. Please enter heads or tails to continue").downcase
+      break if @toss_winner.decision == "heads" || @toss_winner.decision == "tails"
     end
 
-    # Find out who is batting first
+    # computer decides heads or tails
+    computer = random(["heads", "tails"])
+    puts ".....and it is #{computer}."
 
+    if @toss_winner.decision == computer
+      puts "#{@toss_winner.owner_name} wins the toss"
+    else
+      @toss_looser = @toss_winner
+      @toss_winner = @toss_looser == @p1 ? @p2 : @p1
+      puts "#{@toss_looser.owner_name} looses the toss"
+    end
+
+    loop do
+      @toss_winner.decision = input("#{@toss_winner.owner_name} - Please enter either \"bat\" or \"bowl\" to continue.").downcase
+      @toss_looser.decision = @toss_winner.decision == "bat" ? "bowl" : "bat"
+      break if @toss_winner.decision == "bat" || @toss_winner.decision == "bowl"
+    end
 
     main_game
   end
