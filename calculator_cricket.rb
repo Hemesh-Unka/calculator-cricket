@@ -1,38 +1,36 @@
 class Player
-  def initialize(name, number, runs = 0)
+  attr_reader :player_runs, :player_name
+
+  def initialize(name, number)
     @player_name = "#{name} #{number}"
-    @player_runs = runs
+    @player_runs = 0
   end
 
-  def add_runs(run)
-    @player_runs += run
-  end
-
-  def total_player_runs
-    @player_runs
+  def add_runs(runs)
+    @player_runs += runs
   end
 end
 
 class Team
-  attr_accessor :owner_name, :decision
+  attr_accessor :owner_name, :decision, :total_runs, :players, :total_runs
 
-  def initialize(runs = 0)
+  def initialize
     @owner_name = ""
-    @total_runs = runs
-    @players = []
     @decision = ""
+    @players = []
+    @total_runs = 0
   end
 
   def create_team
-    (1..11).each { |x| @players << create_player(x) }
-  end
+      (1..11).each { |x| @players << create_player(x) }
+    end
 
-  def create_player(number)
-    Player.new(@owner_name, number)
-  end
+    def create_player(number)
+      Player.new(@owner_name, number)
+    end
 
-  def total_team_runs(team)
-    @total_runs = @players.reduce(:+)
+  def total_team_runs
+    @total_runs = @players.inject(0) { |sum, n| sum + n.player_runs }
   end
 end
 
@@ -40,11 +38,12 @@ class Game
   def initialize
     @p1 = Team.new
     @p2 = Team.new
+
+    start_up
   end
 
   def start_up
     clear_screen
-
     puts "Welcome to Calculator Cricket!"
 
     # enter names
@@ -52,7 +51,7 @@ class Game
     @p2.owner_name = input("Player 2 - Please enter your name").capitalize
 
     # random team is choosen to make the toss
-    @toss_winner = random([@p1, @p2])
+    @toss_winner = [@p1, @p2].sample
     @toss_looser = @toss_winner == @p1 ? @p2 : @p1
 
     # winner decides heads or tails
@@ -62,9 +61,10 @@ class Game
     end
 
     # computer decides heads or tails
-    computer = random(["heads", "tails"])
+    computer = ["heads", "tails"].sample
     puts ".....and it is #{computer}."
 
+    # check if toss is the same as computer
     if @toss_winner.decision == computer
       puts "#{@toss_winner.owner_name} wins the toss"
     else
@@ -83,53 +83,71 @@ class Game
   end
 
 def main_game
+  # return array who is batting first
+  teams = batting_first(@p1, @p2)
 
-
-
+  teams.each do |team|
+    team.create_team
+    # send in each team to bat
+    bat(team)
+    scorecard(team)
+  end
 end
 
-def ball
-  (0..6).to_a.sample
+def scorecard(team)
+  line_width = 45
+  puts ""
+  puts "---------------------------------------------"
+  puts "Team #{team.owner_name}"
+  puts "---------------------------------------------"
+  team.players.each { |x| puts ("#{x.player_name}".ljust(line_width / 2) + ("#{x.player_runs}".rjust(line_width / 2))) }
+  puts (("TOTAL  (for #{}, #{} overs)".ljust(line_width / 2)) + ("#{team.total_runs}".rjust(line_width / 2)))
+  puts "Fall"
 end
 
 def over
-  (0...6).to_a.map { ball }
+  (0...6).to_a.map { (0..6).to_a.sample }
 end
 
 def bat(team)
-  wickets = 0;
-
-  (0...50).each do
-    over.each do |y|
-
-      if y == 0
-        print "OUT!"
-        wickets += 1
-      elsif y == 4
-        print"4 Runs"
-      elsif y == 6
-        print "6 Runs"
-      else
-        print y
+  wickets = 1;
+  # send in the first two players to bat
+  currently_batting = team.players[0..1] if wickets == 1
+    # iterate overs
+    (0...50).each do
+      # iterate through each ball
+        over.each do |y|
+          if y == 0
+          break if wickets == 10
+            wickets += 1
+            currently_batting[0] = team.players[wickets]
+          elsif y == 4
+            currently_batting[0].add_runs(4)
+          elsif y == 6
+            currently_batting[0].add_runs(6)
+          else
+          if y % 2 != 0
+            currently_batting[0],currently_batting[1] = currently_batting[1],currently_batting[0]
+            currently_batting[0].add_runs(y)
+          else
+            currently_batting[0].add_runs(y)
+          end
+        end
       end
-        print " - "
-
-      break if wickets == 11
-    end
+      break if wickets == 10
   end
-
+  team.total_team_runs
 end
+
+  def batting_first(team_1, team_2)
+    team_1.decision == "bat" ? [team_1, team_2] : [team_2, team_1]
+  end
 
   def input(string)
     puts string
     print "> "
     return gets.chomp
   end
-
-  def random(array)
-    array.sample
-  end
-
 end
 
 def clear_screen
@@ -137,4 +155,3 @@ def clear_screen
 end
 
 game = Game.new
-game.start_up
