@@ -12,24 +12,24 @@ class Player
 end
 
 class Team
-  attr_accessor :owner_name, :decision, :total_runs, :players, :total_runs
-
+  attr_accessor :owner_name, :decision, :total_runs, :players, :wickets
   def initialize
     @owner_name = ""
     @decision = ""
     @players = []
     @total_runs = 0
+    @wickets = 0
   end
 
   def create_team
-      (1..11).each { |x| @players << create_player(x) }
-    end
+    (1..11).each { |x| @players << create_player(x) }
+  end
 
-    def create_player(number)
-      Player.new(@owner_name, number)
-    end
+  def create_player(number)
+    Player.new(@owner_name, number)
+  end
 
-  def total_team_runs
+  def total_runs
     @total_runs = @players.inject(0) { |sum, n| sum + n.player_runs }
   end
 end
@@ -38,8 +38,20 @@ class Game
   def initialize
     @p1 = Team.new
     @p2 = Team.new
+    @overs_to_play = 50
+    @balls = 0
 
     start_up
+  end
+
+  def coin_toss_animation
+    animation = ["|","/","-","\\","|","/","-","\\"]
+    2.times do
+        animation.each do |x|
+          print x + "\r"
+          sleep(0.1)
+      end
+    end
   end
 
   def start_up
@@ -62,7 +74,8 @@ class Game
 
     # computer decides heads or tails
     computer = ["heads", "tails"].sample
-    puts ".....and it is #{computer}."
+    coin_toss_animation
+    print ".....and it is #{computer}. "
 
     # check if toss is the same as computer
     if @toss_winner.decision == computer
@@ -82,62 +95,69 @@ class Game
     main_game
   end
 
-def main_game
-  # return array who is batting first
-  teams = batting_first(@p1, @p2)
+  def main_game
+    teams = batting_first(@p1, @p2) # return array with team who is batting first
 
-  teams.each do |team|
-    team.create_team
-    # send in each team to bat
-    bat(team)
-    scorecard(team)
+    teams.each do |team|
+      team.create_team  # create team
+      bat(team)  # send teams into bat
+      scorecard(team) # display scorecard and results
+    end
   end
-end
 
-def scorecard(team)
-  line_width = 45
-  puts ""
-  puts "---------------------------------------------"
-  puts "Team #{team.owner_name}"
-  puts "---------------------------------------------"
-  team.players.each { |x| puts ("#{x.player_name}".ljust(line_width / 2) + ("#{x.player_runs}".rjust(line_width / 2))) }
-  puts (("TOTAL  (for #{}, #{} overs)".ljust(line_width / 2)) + ("#{team.total_runs}".rjust(line_width / 2)))
-  puts "Fall"
-end
+  def overs_played
+    (@balls / 6).floor + (@balls % 6.0 / 10)
+  end
 
-def over
-  (0...6).to_a.map { (0..6).to_a.sample }
-end
+  def scorecard(team)
+    line_width = 50
+    puts ""
+    puts "--------------------------------------------------".ljust(line_width / 2)
+    puts "Team #{team.owner_name}".center(line_width)
+    puts "--------------------------------------------------".ljust(line_width / 2)
+    team.players.each do |player|
+      puts ("#{player.player_name}".ljust(line_width / 2) + ("#{player.player_runs}".rjust(line_width / 2)))
+      #break if overs == 50
+    end
+    puts (("TOTAL (#{team.wickets == 10 ? "all out" : "for #{team.wickets} wkts"}, #{overs_played} overs)".ljust(line_width / 2)) + ("#{team.total_runs}".rjust(line_width / 2)))
+  end
 
-def bat(team)
-  wickets = 1;
-  # send in the first two players to bat
-  currently_batting = team.players[0..1] if wickets == 1
-    # iterate overs
-    (0...50).each do
-      # iterate through each ball
-        over.each do |y|
-          if y == 0
-          break if wickets == 10
-            wickets += 1
-            currently_batting[0] = team.players[wickets]
-          elsif y == 4
-            currently_batting[0].add_runs(4)
-          elsif y == 6
-            currently_batting[0].add_runs(6)
-          else
-          if y % 2 != 0
-            currently_batting[0],currently_batting[1] = currently_batting[1],currently_batting[0]
-            currently_batting[0].add_runs(y)
-          else
-            currently_batting[0].add_runs(y)
+  def ball
+    (0..6).to_a.sample
+  end
+
+  def over
+    (0...6).to_a.map { ball }
+  end
+
+  def bat(team)
+    currently_batting = team.players[0..1] # send first two players into bat
+
+      (0...@overs_to_play).each do # iterate overs (Can be specified)
+          over.each do |y| # iterate balls (6)
+
+            break if team.wickets == 10 # stop the game!
+            @balls += 1
+
+            if y == 0 # wicket
+              team.wickets += 1
+              currently_batting[0] = team.players[team.wickets + 1]
+            elsif y == 4
+              currently_batting[0].add_runs(4)
+            elsif y == 6
+              currently_batting[0].add_runs(6)
+            else
+            if y.odd? # swap players around if odd runs scored
+              currently_batting[0], currently_batting[1] = currently_batting[1], currently_batting[0]
+              currently_batting[0].add_runs(y)
+            else
+              currently_batting[0].add_runs(y)
+            end
           end
         end
-      end
-      break if wickets == 10
+    end
+    team.total_runs
   end
-  team.total_team_runs
-end
 
   def batting_first(team_1, team_2)
     team_1.decision == "bat" ? [team_1, team_2] : [team_2, team_1]
@@ -146,7 +166,7 @@ end
   def input(string)
     puts string
     print "> "
-    return gets.chomp
+    gets.chomp
   end
 end
 
