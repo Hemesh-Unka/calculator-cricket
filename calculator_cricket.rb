@@ -23,11 +23,7 @@ class Team
   end
 
   def create_team
-    (1..11).each { |x| @players << create_player(x) }
-  end
-
-  def create_player(number)
-    Player.new(@owner_name, number)
+    (1..11).each { |x| @players << Player.new(@owner_name, x) }
   end
 
   def total_runs
