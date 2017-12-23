@@ -7,6 +7,7 @@ To Do:
 2. Play again option
 3. Indicate players who are not out
 4. Improve .sample odds
+5. Fix layout issues
 
 My goals whilst building this program are:
 1. <del>Get familiar with git</del>

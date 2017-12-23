@@ -13,6 +13,7 @@ end
 
 class Team
   attr_accessor :owner_name, :decision, :total_runs, :players, :wickets
+
   def initialize
     @owner_name = ""
     @decision = ""
