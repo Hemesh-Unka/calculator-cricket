@@ -8,6 +8,8 @@ To Do:
 3. Indicate players who are not out
 4. Improve .sample odds
 5. Fix layout issues
+6. Host a live version of the game
+7. Clean up code
 
 My goals whilst building this program are:
 1. <del>Get familiar with git</del>
