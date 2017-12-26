@@ -41,16 +41,6 @@ class Game
     start_up
   end
 
-  def coin_toss_animation
-    animation = ["|","/","-","\\","|","/","-","\\"]
-    2.times do
-        animation.each do |x|
-          print x + "\r"
-          sleep(0.1)
-      end
-    end
-  end
-
   def start_up
     clear_screen
     puts "Welcome to Calculator Cricket!"
@@ -71,7 +61,6 @@ class Game
 
     # computer decides heads or tails
     computer = ["heads", "tails"].sample
-    coin_toss_animation
     print ".....and it is #{computer}. "
 
     # check if toss is the same as computer
@@ -93,7 +82,7 @@ class Game
   end
 
   def main_game
-    teams = batting_first(@p1, @p2) # return array with team who is batting first
+    teams = @p1.decision == "bat" ? [@p1, @p2] : [@p2, @p1] # return array with team who is batting first
 
     teams.each do |team|
       team.create_team  # create team
@@ -119,12 +108,8 @@ class Game
     puts (("TOTAL (#{team.wickets == 10 ? "all out" : "for #{team.wickets} wkts"}, #{overs_played} overs)".ljust(line_width / 2)) + ("#{team.total_runs}".rjust(line_width / 2)))
   end
 
-  def ball
-    (0..6).to_a.sample
-  end
-
   def over
-    (0...6).to_a.map { ball }
+    (0...6).to_a.map { (0..6).to_a.sample }
   end
 
   def bat(team)
@@ -132,32 +117,20 @@ class Game
 
       (0...@overs_to_play).each do # iterate overs (Can be specified)
           over.each do |y| # iterate balls (6)
-
             break if team.wickets == 10 # stop the game!
             @balls += 1
-
             if y == 0 # wicket
               team.wickets += 1
-              currently_batting[0] = team.players[team.wickets + 1]
-            elsif y == 4
-              currently_batting[0].add_runs(4)
-            elsif y == 6
-              currently_batting[0].add_runs(6)
-            else
-            if y.odd? # swap players around if odd runs scored
+              currently_batting[0] = team.players[team.wickets + 1] # send in the next player to bat
+            elsif y.odd? # swap players around if odd runs scored
               currently_batting[0], currently_batting[1] = currently_batting[1], currently_batting[0]
               currently_batting[0].add_runs(y)
             else
               currently_batting[0].add_runs(y)
             end
           end
-        end
-    end
+      end
     team.total_runs
-  end
-
-  def batting_first(team_1, team_2)
-    team_1.decision == "bat" ? [team_1, team_2] : [team_2, team_1]
   end
 
   def input(string)

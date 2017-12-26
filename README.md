@@ -11,8 +11,8 @@ To Do:
 6. Host a live version of the game
 7. Clean up code
 
-My goals whilst building this program are:
+My goals while building this program include:
 1. <del>Get familiar with git</del>
 2. <del>Get familiar with the command line</del>
 3. <del>Get some code up</del>
-4. <del>Get comfortable with OOP design</del>
+4. <del>Be more comfortable using OOP design practises</del>
