@@ -3,7 +3,7 @@
 This is a game we used to play in maths when we were bored. I added a few other features, such as individual player scores, and a visual score card emulated from an old school teletext page.
 
 To Do:
-1. Add fall of wickets
+1. <del>Add fall of wickets</del>
 2. Play again option
 3. Indicate players who are not out
 4. Improve .sample odds

@@ -12,7 +12,7 @@ class Player
 end
 
 class Team
-  attr_accessor :owner_name, :decision, :total_runs, :players, :wickets
+  attr_accessor :owner_name, :decision, :total_runs, :players, :wickets, :fall_of_wickets
 
   def initialize
     @owner_name = ""
@@ -20,10 +20,11 @@ class Team
     @players = []
     @total_runs = 0
     @wickets = 0
+    @fall_of_wickets = []
   end
 
   def create_team
-    (1..11).each { |x| @players << Player.new(@owner_name, x) }
+    11.times.each { |x| @players << Player.new(@owner_name, x + 1) }
   end
 
   def total_runs
@@ -106,21 +107,23 @@ class Game
       #break if overs == 50
     end
     puts (("TOTAL (#{team.wickets == 10 ? "all out" : "for #{team.wickets} wkts"}, #{overs_played} overs)".ljust(line_width / 2)) + ("#{team.total_runs}".rjust(line_width / 2)))
+    puts "Fall: #{team.fall_of_wickets.join('  ')}".ljust(line_width / 2)
   end
 
   def over
-    (0...6).to_a.map { (0..6).to_a.sample }
+      (0...6).to_a.map { (0..6).to_a.sample }
   end
 
   def bat(team)
     currently_batting = team.players[0..1] # send first two players into bat
 
       (0...@overs_to_play).each do # iterate overs (Can be specified)
-          over.each do |y| # iterate balls (6)
+          over.each do |y| # iterate balls
             break if team.wickets == 10 # stop the game!
             @balls += 1
             if y == 0 # wicket
               team.wickets += 1
+              team.fall_of_wickets << "#{team.wickets}-#{team.total_runs}"
               currently_batting[0] = team.players[team.wickets + 1] # send in the next player to bat
             elsif y.odd? # swap players around if odd runs scored
               currently_batting[0], currently_batting[1] = currently_batting[1], currently_batting[0]
