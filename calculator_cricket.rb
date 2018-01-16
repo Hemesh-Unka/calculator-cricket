@@ -1,9 +1,11 @@
 class Player
   attr_reader :player_runs, :player_name
+  attr_accessor :player_status
 
   def initialize(name, number)
     @player_name = "#{name} #{number}"
     @player_runs = 0
+    @player_status = "Not Out"
   end
 
   def add_runs(runs)
@@ -34,7 +36,7 @@ end
 class Game
   def initialize
     @players = [1,2].map { |number| Team.new(number) }
-    @overs_to_play = 50
+    @overs_to_play = 20
     @balls = 0
 
     start_up
@@ -63,12 +65,12 @@ class Game
     # check if toss is the same as computer (Can condense)
     print "#{@players[0].owner_name}"
     if @toss_decision == computer
-      print  " wins"
+      print " wins"
     else
       @players.reverse!
       print " looses"
     end
-    puts  " the toss"
+    puts " the toss"
 
     loop do
       @toss_decision = input("#{@players[0].owner_name} - Please enter either \"bat\" or \"bowl\" to continue.").downcase
@@ -100,7 +102,7 @@ class Game
     puts "Team #{team.owner_name}".center(line_width)
     puts "--------------------------------------------------".ljust(line_width / 2)
     team.players.each do |player|
-      puts ("#{player.player_name}".ljust(line_width / 2) + ("#{player.player_runs}".rjust(line_width / 2)))
+      puts ("#{player.player_name}".ljust(line_width / 2) + ("#{player.player_status}".ljust(10) + ("#{player.player_runs}".rjust(line_width / 2))))
     end
     puts (("TOTAL (#{team.wickets == 10 ? "all out" : "for #{team.wickets} wkts"}, #{overs_played} overs)".ljust(line_width / 2)) + ("#{team.total_runs}".rjust(line_width / 2)))
     puts "Fall: #{team.fall_of_wickets.join('  ')}".ljust(line_width / 2)
@@ -111,17 +113,23 @@ class Game
   end
 
   def bat(team)
-    currently_batting = team.players[0..1] # send first two players into bat
-
-      (0...@overs_to_play).each do # iterate overs (Can be specified)
-          over.each do |y| # iterate balls
-            break if team.wickets == 10 # stop game
+    @balls = 0
+    # send in first two players into bat
+    currently_batting = team.players[0..1]
+      # iterate overs (Can be specified)
+      (0...@overs_to_play).each do |x|
+          # iterate balls
+          over.each do |y|
             @balls += 1
+            # stop game
+            break if team.wickets == 10 || x == @overs_to_play
             # wicket
             if y == 0
               team.wickets += 1
               team.fall_of_wickets << "#{team.wickets}-#{team.total_runs}"
-              currently_batting[0] = team.players[team.wickets + 1] # send in the next player to bat
+              currently_batting[0].player_status = "Out"
+              # send in the next player to bat
+              currently_batting[0] = team.players[team.wickets + 1]
               # swap players around if odd amount runs are scored
             elsif y.odd?
               currently_batting[0], currently_batting[1] = currently_batting[1], currently_batting[0]
