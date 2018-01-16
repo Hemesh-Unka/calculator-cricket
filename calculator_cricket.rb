@@ -12,11 +12,10 @@ class Player
 end
 
 class Team
-  attr_accessor :owner_name, :decision, :total_runs, :players, :wickets, :fall_of_wickets
+  attr_accessor :owner_name, :total_runs, :players, :wickets, :fall_of_wickets
 
-  def initialize
-    @owner_name = ""
-    @decision = ""
+  def initialize(number)
+    @owner_name = "Player #{number}"
     @players = []
     @total_runs = 0
     @wickets = 0
@@ -34,8 +33,7 @@ end
 
 class Game
   def initialize
-    @p1 = Team.new
-    @p2 = Team.new
+    @players = [1,2].map { |number| Team.new(number) }
     @overs_to_play = 50
     @balls = 0
 
@@ -47,47 +45,46 @@ class Game
     puts "Welcome to Calculator Cricket!"
 
     # enter names
-    @p1.owner_name = input("Player 1 - Please enter your name").capitalize
-    @p2.owner_name = input("Player 2 - Please enter your name").capitalize
+    @players.each { |player| player.owner_name = input("#{player.owner_name} - Please enter your name").capitalize }
 
     # random team is choosen to make the toss
-    @toss_winner = [@p1, @p2].sample
-    @toss_looser = @toss_winner == @p1 ? @p2 : @p1
+    @players.shuffle!
 
     # winner decides heads or tails
     loop do
-      @toss_winner.decision = input("#{@toss_winner.owner_name} gets to decide the toss. Please enter heads or tails to continue").downcase
-      break if @toss_winner.decision == "heads" || @toss_winner.decision == "tails"
+      @toss_decision = input("#{@players[0].owner_name} gets to decide the toss. Please enter heads or tails to continue").downcase
+      break if @toss_decision == "heads" || @toss_decision == "tails"
     end
 
     # computer decides heads or tails
     computer = ["heads", "tails"].sample
     print ".....and it is #{computer}. "
 
-    # check if toss is the same as computer
-    if @toss_winner.decision == computer
-      puts "#{@toss_winner.owner_name} wins the toss"
+    # check if toss is the same as computer (Can condense)
+    print "#{@players[0].owner_name}"
+    if @toss_decision == computer
+      print  " wins"
     else
-      @toss_looser = @toss_winner
-      @toss_winner = @toss_looser == @p1 ? @p2 : @p1
-      puts "#{@toss_looser.owner_name} looses the toss"
+      @players.reverse!
+      print " looses"
     end
+    puts  " the toss"
 
     loop do
-      @toss_winner.decision = input("#{@toss_winner.owner_name} - Please enter either \"bat\" or \"bowl\" to continue.").downcase
-      @toss_looser.decision = @toss_winner.decision == "bat" ? "bowl" : "bat"
-      break if @toss_winner.decision == "bat" || @toss_winner.decision == "bowl"
+      @toss_decision = input("#{@players[0].owner_name} - Please enter either \"bat\" or \"bowl\" to continue.").downcase
+      @players.reverse! if @toss_decision == "bowl"
+      break if @toss_decision == "bat" || @toss_decision == "bowl"
     end
 
     main_game
   end
 
   def main_game
-    teams = @p1.decision == "bat" ? [@p1, @p2] : [@p2, @p1] # return array with team who is batting first
+    teams = @players
 
     teams.each do |team|
       team.create_team  # create team
-      bat(team)  # send teams into bat
+      bat(team)  # send team into bat
       scorecard(team) # display scorecard and results
     end
   end
@@ -104,7 +101,6 @@ class Game
     puts "--------------------------------------------------".ljust(line_width / 2)
     team.players.each do |player|
       puts ("#{player.player_name}".ljust(line_width / 2) + ("#{player.player_runs}".rjust(line_width / 2)))
-      #break if overs == 50
     end
     puts (("TOTAL (#{team.wickets == 10 ? "all out" : "for #{team.wickets} wkts"}, #{overs_played} overs)".ljust(line_width / 2)) + ("#{team.total_runs}".rjust(line_width / 2)))
     puts "Fall: #{team.fall_of_wickets.join('  ')}".ljust(line_width / 2)
@@ -119,13 +115,15 @@ class Game
 
       (0...@overs_to_play).each do # iterate overs (Can be specified)
           over.each do |y| # iterate balls
-            break if team.wickets == 10 # stop the game!
+            break if team.wickets == 10 # stop game
             @balls += 1
-            if y == 0 # wicket
+            # wicket
+            if y == 0
               team.wickets += 1
               team.fall_of_wickets << "#{team.wickets}-#{team.total_runs}"
               currently_batting[0] = team.players[team.wickets + 1] # send in the next player to bat
-            elsif y.odd? # swap players around if odd runs scored
+              # swap players around if odd amount runs are scored
+            elsif y.odd?
               currently_batting[0], currently_batting[1] = currently_batting[1], currently_batting[0]
               currently_batting[0].add_runs(y)
             else
@@ -141,10 +139,10 @@ class Game
     print "> "
     gets.chomp
   end
-end
 
-def clear_screen
-  return print "\e[H\e[2J"
+  def clear_screen
+    print "\e[H\e[2J"
+  end
 end
 
 game = Game.new
