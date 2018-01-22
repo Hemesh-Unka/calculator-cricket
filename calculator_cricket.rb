@@ -37,10 +37,11 @@ class Game
   def initialize
     @players = [1,2].map { |number| Team.new(number) }
     @overs_to_play = 20
-    @balls = 0
 
-    start_up
+    first_run?
+    #start_up
   end
+
 
   def start_up
     clear_screen
@@ -150,6 +151,11 @@ class Game
 
   def clear_screen
     print "\e[H\e[2J"
+  end
+
+  def first_run?
+
+    puts Game::count
   end
 end
 
