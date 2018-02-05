@@ -38,8 +38,7 @@ class Game
     @players = [1,2].map { |number| Team.new(number) }
     @overs_to_play = 20
 
-    first_run?
-    #start_up
+    start_up
   end
 
 
@@ -151,11 +150,6 @@ class Game
 
   def clear_screen
     print "\e[H\e[2J"
-  end
-
-  def first_run?
-
-    puts Game::count
   end
 end
 
