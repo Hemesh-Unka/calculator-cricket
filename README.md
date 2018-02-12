@@ -1,18 +1,26 @@
-# Calculator Cricket
+# Calculator Cricket  #
 
-I built this game to get some practice with Ruby. We used to play this game in school when lessons were boring. I added a few other features, such as individual player scores, and a visual score card emulated from an old school teletext page.
+This game solely relies on luck. It utilises the `.sample` method to simulate a real cricket game.
 
-To Do:
-1. <del>Add fall of wickets</del>
-2. Play again option
-3. <del>Indicate players who are not out</del>
-4. Improve .sample odds
-5. Fix layout issues
-6. Host a live version of the game
-7. Clean up code
+I built this game to get some practice with Ruby, and drive home some core programming fundamentals.
 
-My goals while building this program include:
-1. <del>Get familiar with git</del>
-2. <del>Get familiar with the command line</del>
-3. <del>Get some code up</del>
-4. <del>Be more comfortable using OOP design practises</del>
+The idea of the game came from high school, we used to play this game on our calculators when lessons were boring. I added a few other features which couldn't be emulated on a calculator at the time. These included: individual player scores and a visual score card emulated from an old school teletext page.
+
+## How to use ##
+```shell
+ruby calculator-cricket.rb
+```
+
+### To Do: ###
+- [x] Add fall of wickets feature
+- [ ] Play again option
+- [x] Indicate players who are not out
+- [ ] Improve .sample odds
+- [ ] Fix layout issues
+- [ ] Host a live version of the game
+- [ ] Clean up code
+
+### My goals whilst building this program included: ###
+- [x] Become more familiar with git & github
+- [x] Get familiar with the command line
+- [x] Be more comfortable using OOP practices
